@@ -3,6 +3,9 @@ include 'koneksi.php';
 
 $dt_barang = getData();
 
+$is_tambah_stok = false;
+$id_tambah_stok = null;
+
 if(!empty($_POST)){
     $action = $_POST['action'];
     if($action == 'delete'){
@@ -12,6 +15,19 @@ if(!empty($_POST)){
             echo "<script>alert('Data berhasil dihapus'); window.location.href=''</script>";
         }else{
             echo "<script>alert('Data gagal dihapus');</script>";
+        }
+    } else if ($action == 'tambah_stok'){
+        $is_tambah_stok = true;
+        $id_tambah_stok = $_POST['key'];
+    } else if ($action == 'simpan_stok') {
+        $key = $_POST['key'];
+        $data = getDataById($key);
+        $data['jumlah_barang'] = $_POST['jumlah_barang'];
+        $return = updateData($data);
+        if($return){
+            echo "<script>alert('Stok berhasil disimpan'); window.location.href=''</script>";
+        }else{
+            echo "<script>alert('Stok gagal disimpan');</script>";
         }
     }
 }
@@ -46,6 +62,7 @@ if(!empty($_POST)){
                             <th>Kode Barang</th>
                             <th>Nama Barang</th>
                             <th>Jumlah Barang</th>
+                            <th>Satuan</th>
                             <th>Harga Barang</th>
                             <th>Status</th>
                             <th>Aksi</th>
@@ -56,12 +73,24 @@ if(!empty($_POST)){
                                     <td><?= $no ?></td>
                                     <td><?= $value['kode_barang'] ?></td>
                                     <td><?= $value['nama_barang'] ?></td>
-                                    <td><?= $value['jumlah_barang'] . ' ' . $value['satuan_barang'] ?></td>
+                                    <td>
+                                        <?php if ($is_tambah_stok && $id_tambah_stok == $value['id_barang']) : ?>
+                                            <input type="number" name="jumlah_barang" class="form-control" id="jumlah_barang_edit" value="<?= $value['jumlah_barang'] ?>" placeholder="Jumlah Barang" required>
+                                        <?php else: ?>  
+                                         <?= $value['jumlah_barang'] ?>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td><?= $value['satuan_barang'] ?></td>
                                     <td>Rp. <?= number_format($value['harga_beli']) ?></td>
                                     <td><?= $value['status_barang'] ? 'Available' : 'Not-Available' ?></td>
                                     <td>
-                                        <a class="btn btn-warning btn-sm" href="data_barang.php/<?= $value['id_barang'] ?>"><i class="fa fa-pencil" aria-hidden="true"></i></a>
-                                        <a class="btn btn-danger btn-sm" onclick="deleteBarang('<?= $value['id_barang'] ?>', '<?= $value['kode_barang'] . ' - ' . $value['nama_barang'] ?>')"><i class="fa fa-trash" aria-hidden="true"></i></a>
+                                        <?php if ($is_tambah_stok && $id_tambah_stok == $value['id_barang']) : ?>
+                                            <button class="btn btn-success btn-sm" onclick="simpanStok('<?= $value['id_barang'] ?>')">Simpan</button>
+                                        <?php else: ?>
+                                            <a class="btn btn-warning btn-sm" href="data_barang.php/<?= $value['id_barang'] ?>"><i class="fa fa-pencil" aria-hidden="true"></i></a>
+                                            <a class="btn btn-danger btn-sm" onclick="deleteBarang('<?= $value['id_barang'] ?>', '<?= $value['kode_barang'] . ' - ' . $value['nama_barang'] ?>')"><i class="fa fa-trash" aria-hidden="true"></i></a>
+                                            <a class="btn btn-info btn-sm text-white" onclick="tambahStok('<?= $value['id_barang'] ?>')">Tambah Stok</a>
+                                        <?php endif; ?>
                                     </td>
                                 </tr>
                             <?php $no++; endforeach; ?>
@@ -72,6 +101,7 @@ if(!empty($_POST)){
                 <form action="" method="POST">
                     <input type="text" name="action" id="action" hidden>
                     <input type="text" name="key" id="key" hidden>
+                    <input type="text" name="jumlah_barang" id="jumlah_barang" hidden>
                 </form>
             </main>
         </body>
@@ -90,6 +120,20 @@ if(!empty($_POST)){
                 $('#key').val(key);
                 $('form').submit();
             }
+        }
+
+        function tambahStok(key){
+            $('#action').val('tambah_stok');
+            $('#key').val(key);
+            $('form').submit();
+        }
+
+        function simpanStok(key){
+            let jumlah_barang = $('#jumlah_barang_edit').val();
+            $('#action').val('simpan_stok');
+            $('#key').val(key);
+            $('#jumlah_barang').val(jumlah_barang);
+            $('form').submit();
         }
     </script>
 </body>
