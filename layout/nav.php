@@ -6,7 +6,7 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
         <div class="navbar-nav">
-            <a class="nav-link active" aria-current="page" href="index.php">Data Barang</a>
+            <a class="nav-link active" aria-current="page" href="/inventory">Data Barang</a>
             <a class="nav-link" href="peminjaman.php">Peminjaman</a>
         </div>
         </div>
